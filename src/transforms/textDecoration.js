@@ -1,4 +1,4 @@
-import { regExpToken, SPACE, LINE, COLOR } from '../tokenTypes'
+import { regExpToken, SPACE, LINE, COLOR, VARIABLE } from '../tokenTypes'
 
 const STYLE = regExpToken(/^(solid|double|dotted|dashed)$/)
 
@@ -34,7 +34,10 @@ export default tokenStream => {
       line = lines.join(' ')
     } else if (style === undefined && tokenStream.matches(STYLE)) {
       style = tokenStream.lastValue
-    } else if (color === undefined && tokenStream.matches(COLOR)) {
+    } else if (
+      color === undefined &&
+      (tokenStream.matches(COLOR) || tokenStream.matches(VARIABLE))
+    ) {
       color = tokenStream.lastValue
     } else {
       tokenStream.throw()

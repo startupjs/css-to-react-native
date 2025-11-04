@@ -5,6 +5,7 @@ import {
   PERCENT,
   UNSUPPORTED_LENGTH_UNIT,
   WORD,
+  VARIABLE,
 } from '../tokenTypes'
 import aspectRatio from './aspectRatio'
 import border from './border'
@@ -22,10 +23,10 @@ import transform from './transform'
 import { directionFactory, parseShadowOffset } from './util'
 
 const background = tokenStream => ({
-  backgroundColor: tokenStream.expect(COLOR),
+  backgroundColor: tokenStream.expect(COLOR, VARIABLE),
 })
 const borderColor = directionFactory({
-  types: [COLOR],
+  types: [COLOR, VARIABLE],
   prefix: 'border',
   suffix: 'Color',
 })

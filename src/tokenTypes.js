@@ -27,6 +27,42 @@ const matchColor = node => {
   return null
 }
 
+const matchVariable = node => {
+  if (
+    (node.type !== 'function' && node.value !== 'var') ||
+    node.nodes.length === 0
+  )
+    return null
+
+  const variableName = node.nodes[0].value
+
+  if (node.nodes.length === 1) {
+    return `var(${variableName})`
+  }
+
+  const defaultValues = node.nodes
+    .slice(1)
+    .filter(subnode => subnode.type !== 'div')
+    .map(subnode => {
+      if (subnode.type === 'string') {
+        return `'${matchString(subnode)}'`
+      }
+      if (
+        subnode.type === 'function' &&
+        ['rgb', 'rgba', 'hls', 'hlsa'].includes(subnode.value)
+      ) {
+        return `${subnode.value}(${subnode.nodes.map(n => n.value).join('')})`
+      }
+      return subnode.value
+    })
+
+  if (defaultValues.length !== (node.nodes.length - 1) / 2) {
+    return null
+  }
+
+  return `var(${variableName}, ${defaultValues.join`, `})`
+}
+
 const noneRe = /^(none)$/i
 const autoRe = /^(auto)$/i
 const identRe = /(^-?[_a-z][_a-z0-9-]*$)/i
@@ -73,3 +109,4 @@ export const IDENT = regExpToken(identRe)
 export const STRING = matchString
 export const COLOR = matchColor
 export const LINE = regExpToken(/^(none|underline|line-through)$/i)
+export const VARIABLE = matchVariable

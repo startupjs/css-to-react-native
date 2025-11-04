@@ -83,3 +83,59 @@ it('transforms border for unsupported units', () => {
 it('does not transform border with percentage width', () => {
   expect(() => transformCss([['border', '3% solid black']])).toThrow()
 })
+
+it('transforms border with var() for color', () => {
+  expect(transformCss([['border', '2px solid var(--primary-color)']])).toEqual({
+    borderWidth: 2,
+    borderColor: 'var(--primary-color)',
+    borderStyle: 'solid',
+  })
+})
+
+it('transforms border with var() and named color fallback', () => {
+  expect(
+    transformCss([['border', '2px solid var(--primary-color, red)']])
+  ).toEqual({
+    borderWidth: 2,
+    borderColor: 'var(--primary-color, red)',
+    borderStyle: 'solid',
+  })
+})
+
+it('transforms border with var() and hex color fallback', () => {
+  expect(
+    transformCss([['border', '2px solid var(--primary-color, #f00)']])
+  ).toEqual({
+    borderWidth: 2,
+    borderColor: 'var(--primary-color, #f00)',
+    borderStyle: 'solid',
+  })
+})
+
+it('transforms border with var() and rgb color fallback', () => {
+  expect(
+    transformCss([['border', '2px solid var(--primary-color, rgb(255, 0, 0))']])
+  ).toEqual({
+    borderWidth: 2,
+    borderColor: 'var(--primary-color, rgb(255,0,0))',
+    borderStyle: 'solid',
+  })
+})
+
+it('transforms border with var() in different order', () => {
+  expect(transformCss([['border', 'var(--primary-color) 2px dashed']])).toEqual(
+    {
+      borderWidth: 2,
+      borderColor: 'var(--primary-color)',
+      borderStyle: 'dashed',
+    }
+  )
+})
+
+it('transforms border with only var() color', () => {
+  expect(transformCss([['border', 'var(--primary-color)']])).toEqual({
+    borderWidth: 1,
+    borderColor: 'var(--primary-color)',
+    borderStyle: 'solid',
+  })
+})
