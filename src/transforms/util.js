@@ -5,6 +5,7 @@ import {
   COLOR,
   SPACE,
   NONE,
+  VARIABLE,
 } from '../tokenTypes'
 
 export const directionFactory = ({
@@ -80,7 +81,10 @@ export const parseShadow = tokenStream => {
       } else {
         tokenStream.rewind()
       }
-    } else if (color === undefined && tokenStream.matches(COLOR)) {
+    } else if (
+      color === undefined &&
+      (tokenStream.matches(COLOR) || tokenStream.matches(VARIABLE))
+    ) {
       color = tokenStream.lastValue
     } else {
       tokenStream.throw()
