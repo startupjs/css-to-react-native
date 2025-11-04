@@ -101,3 +101,65 @@ it('does not transform text-decoration if multiple colors are used', () => {
     transformCss([['text-decoration', 'underline red yellow']])
   ).toThrow()
 })
+
+it('transforms text-decoration with var() for color', () => {
+  expect(
+    transformCss([['text-decoration', 'underline var(--primary-color)']])
+  ).toEqual({
+    textDecorationLine: 'underline',
+    textDecorationStyle: 'solid',
+    textDecorationColor: 'var(--primary-color)',
+  })
+})
+
+it('transforms text-decoration with var() and style', () => {
+  expect(
+    transformCss([['text-decoration', 'underline dotted var(--primary-color)']])
+  ).toEqual({
+    textDecorationLine: 'underline',
+    textDecorationStyle: 'dotted',
+    textDecorationColor: 'var(--primary-color)',
+  })
+})
+
+it('transforms text-decoration with var() and fallback', () => {
+  expect(
+    transformCss([['text-decoration', 'underline var(--primary-color, red)']])
+  ).toEqual({
+    textDecorationLine: 'underline',
+    textDecorationStyle: 'solid',
+    textDecorationColor: 'var(--primary-color, red)',
+  })
+})
+
+it('transforms text-decoration with var() and hex fallback', () => {
+  expect(
+    transformCss([['text-decoration', 'underline var(--primary-color, #f00)']])
+  ).toEqual({
+    textDecorationLine: 'underline',
+    textDecorationStyle: 'solid',
+    textDecorationColor: 'var(--primary-color, #f00)',
+  })
+})
+
+it('transforms text-decoration with var() and rgb fallback', () => {
+  expect(
+    transformCss([
+      ['text-decoration', 'underline var(--primary-color, rgb(255, 0, 0))'],
+    ])
+  ).toEqual({
+    textDecorationLine: 'underline',
+    textDecorationStyle: 'solid',
+    textDecorationColor: 'var(--primary-color, rgb(255,0,0))',
+  })
+})
+
+it('transforms text-decoration with var() in different order', () => {
+  expect(
+    transformCss([['text-decoration', 'var(--primary-color) underline dotted']])
+  ).toEqual({
+    textDecorationLine: 'underline',
+    textDecorationStyle: 'dotted',
+    textDecorationColor: 'var(--primary-color)',
+  })
+})
