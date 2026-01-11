@@ -1,11 +1,10 @@
-import { parseShadow } from './util'
+import { stringify } from 'postcss-value-parser'
 
 export default tokenStream => {
-  const { offset, radius, color } = parseShadow(tokenStream)
+  // React Native now supports web-style box-shadow format directly
+  // Pass through the original CSS value as boxShadow
+  const value = stringify(tokenStream.nodes)
   return {
-    shadowOffset: offset,
-    shadowRadius: radius,
-    shadowColor: color,
-    shadowOpacity: 1,
+    boxShadow: value,
   }
 }

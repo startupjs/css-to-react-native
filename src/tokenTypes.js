@@ -37,6 +37,7 @@ const lengthRe = /^(0$|(?:[+-]?(?:\d*\.)?\d+(?:e[+-]?\d+)?)(?=px$))/i
 const unsupportedUnitRe = /^([+-]?(?:\d*\.)?\d+(?:e[+-]?\d+)?(ch|em|ex|rem|vh|vw|vmin|vmax|cm|mm|in|pc|pt))$/i
 const angleRe = /^([+-]?(?:\d*\.)?\d+(?:e[+-]?\d+)?(?:deg|rad|grad|turn))$/i
 const percentRe = /^([+-]?(?:\d*\.)?\d+(?:e[+-]?\d+)?%)$/i
+const timeRe = /^([+-]?(?:\d*\.)?\d+(?:e[+-]?\d+)?(?:ms|s))$/i
 
 const noopToken = predicate => node => (predicate(node) ? '<token>' : null)
 
@@ -69,7 +70,27 @@ export const LENGTH = regExpToken(lengthRe, Number)
 export const UNSUPPORTED_LENGTH_UNIT = regExpToken(unsupportedUnitRe)
 export const ANGLE = regExpToken(angleRe, angle => angle.toLowerCase())
 export const PERCENT = regExpToken(percentRe)
+export const TIME = regExpToken(timeRe)
 export const IDENT = regExpToken(identRe)
 export const STRING = matchString
 export const COLOR = matchColor
 export const LINE = regExpToken(/^(none|underline|line-through)$/i)
+
+// Animation/Transition timing functions (keywords)
+export const TIMING_FUNCTION = regExpToken(
+  /^(ease|linear|ease-in|ease-out|ease-in-out|step-start|step-end)$/i
+)
+
+// Animation iteration count
+export const ITERATION_COUNT = regExpToken(/^(infinite)$/i)
+
+// Animation direction
+export const ANIMATION_DIRECTION = regExpToken(
+  /^(normal|reverse|alternate|alternate-reverse)$/i
+)
+
+// Animation fill mode
+export const FILL_MODE = regExpToken(/^(none|forwards|backwards|both)$/i)
+
+// Animation play state
+export const PLAY_STATE = regExpToken(/^(running|paused)$/i)

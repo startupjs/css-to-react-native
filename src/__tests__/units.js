@@ -117,10 +117,7 @@ lengthUnits.forEach(unit => {
     expect(
       transformCss([['box-shadow', `10px ${value} ${value} red`]])
     ).toEqual({
-      shadowOffset: { width: 10, height: value },
-      shadowRadius: value,
-      shadowColor: 'red',
-      shadowOpacity: 1,
+      boxShadow: `10px ${value} ${value} red`,
     })
   })
 })
