@@ -5,6 +5,7 @@ import {
   LENGTH,
   UNSUPPORTED_LENGTH_UNIT,
   SPACE,
+  VARIABLE,
 } from '../tokenTypes'
 
 const BORDER_STYLE = regExpToken(/^(solid|dashed|dotted)$/)
@@ -32,7 +33,10 @@ export default tokenStream => {
       tokenStream.matches(LENGTH, UNSUPPORTED_LENGTH_UNIT)
     ) {
       borderWidth = tokenStream.lastValue
-    } else if (borderColor === undefined && tokenStream.matches(COLOR)) {
+    } else if (
+      borderColor === undefined &&
+      (tokenStream.matches(COLOR) || tokenStream.matches(VARIABLE))
+    ) {
       borderColor = tokenStream.lastValue
     } else if (borderStyle === undefined && tokenStream.matches(BORDER_STYLE)) {
       borderStyle = tokenStream.lastValue

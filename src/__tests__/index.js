@@ -202,3 +202,37 @@ it('throws useful errors', () => {
     'Failed to parse declaration "margin: 10"'
   )
 })
+
+it('transforms background with var() for color', () => {
+  expect(transformCss([['background', 'var(--primary-color)']])).toEqual({
+    backgroundColor: 'var(--primary-color)',
+  })
+})
+
+it('transforms background with var() and named color fallback', () => {
+  expect(transformCss([['background', 'var(--primary-color, red)']])).toEqual({
+    backgroundColor: 'var(--primary-color, red)',
+  })
+})
+
+it('transforms background with var() and hex color fallback', () => {
+  expect(transformCss([['background', 'var(--primary-color, #f00)']])).toEqual({
+    backgroundColor: 'var(--primary-color, #f00)',
+  })
+})
+
+it('transforms background with var() and rgb color fallback', () => {
+  expect(
+    transformCss([['background', 'var(--primary-color, rgb(255, 0, 0))']])
+  ).toEqual({
+    backgroundColor: 'var(--primary-color, rgb(255,0,0))',
+  })
+})
+
+it('transforms background with var() and rgba color fallback', () => {
+  expect(
+    transformCss([['background', 'var(--primary-color, rgba(255, 0, 0, 0.5))']])
+  ).toEqual({
+    backgroundColor: 'var(--primary-color, rgba(255,0,0,0.5))',
+  })
+})
