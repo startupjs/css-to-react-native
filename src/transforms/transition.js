@@ -1,3 +1,4 @@
+import camelizeStyleName from 'camelize'
 import { SPACE, COMMA, IDENT, TIME, NONE } from '../tokenTypes'
 
 // Timing function keywords
@@ -137,8 +138,9 @@ export default tokenStream => {
       }
     }
 
-    // Apply defaults
-    properties.push(property || 'all')
+    // Apply defaults and camelize property name
+    const propName = property || 'all'
+    properties.push(propName === 'all' ? 'all' : camelizeStyleName(propName))
     durations.push(duration || '0s')
     timingFunctions.push(timingFunction || 'ease')
     delays.push(delay || '0s')

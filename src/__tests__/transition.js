@@ -9,6 +9,35 @@ it('transforms transition shorthand', () => {
   })
 })
 
+it('transforms transition with only property and duration', () => {
+  expect(transformCss([['transition', 'opacity 300ms']])).toEqual({
+    transitionProperty: ['opacity'],
+    transitionDuration: ['300ms'],
+    transitionTimingFunction: ['ease'],
+    transitionDelay: ['0s'],
+  })
+})
+
+it('transforms transition property names to camelCase', () => {
+  expect(transformCss([['transition', 'background-color 300ms']])).toEqual({
+    transitionProperty: ['backgroundColor'],
+    transitionDuration: ['300ms'],
+    transitionTimingFunction: ['ease'],
+    transitionDelay: ['0s'],
+  })
+})
+
+it('transforms multiple transition property names to camelCase', () => {
+  expect(
+    transformCss([['transition', 'background-color 300ms, border-radius 500ms ease-out']])
+  ).toEqual({
+    transitionProperty: ['backgroundColor', 'borderRadius'],
+    transitionDuration: ['300ms', '500ms'],
+    transitionTimingFunction: ['ease', 'ease-out'],
+    transitionDelay: ['0s', '0s'],
+  })
+})
+
 it('transforms transition with delay', () => {
   expect(transformCss([['transition', 'opacity 300ms ease 100ms']])).toEqual({
     transitionProperty: ['opacity'],
