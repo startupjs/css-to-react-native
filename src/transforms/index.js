@@ -7,7 +7,16 @@ import {
   WORD,
   VARIABLE,
 } from '../tokenTypes'
-import animation from './animation'
+import animation, {
+  animationName,
+  animationDuration,
+  animationTimingFunction,
+  animationDelay,
+  animationIterationCount,
+  animationDirection,
+  animationFillMode,
+  animationPlayState,
+} from './animation'
 import aspectRatio from './aspectRatio'
 import border from './border'
 import boxShadow from './boxShadow'
@@ -21,7 +30,12 @@ import textDecoration from './textDecoration'
 import textDecorationLine from './textDecorationLine'
 import textShadow from './textShadow'
 import transform from './transform'
-import transition from './transition'
+import transition, {
+  transitionProperty,
+  transitionDuration,
+  transitionTimingFunction,
+  transitionDelay,
+} from './transition'
 import { directionFactory, parseShadowOffset } from './util'
 
 const background = tokenStream => ({
@@ -56,6 +70,14 @@ const textShadowOffset = tokenStream => ({
 
 export default {
   animation,
+  animationName,
+  animationDuration,
+  animationTimingFunction,
+  animationDelay,
+  animationIterationCount,
+  animationDirection,
+  animationFillMode,
+  animationPlayState,
   aspectRatio,
   background,
   border,
@@ -79,4 +101,8 @@ export default {
   textDecorationLine,
   transform,
   transition,
+  transitionProperty,
+  transitionDuration,
+  transitionTimingFunction,
+  transitionDelay,
 }

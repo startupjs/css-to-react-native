@@ -6,6 +6,14 @@ module.exports = {
   },
   overrides: [
     {
+      files: '**/*.js',
+      // disable restricted syntax error
+      rules: {
+        'no-restricted-syntax': 'off',
+        'no-continue': 'off',
+      },
+    },
+    {
       files: '**/__tests__/*.js',
       env: { jest: true },
     },
