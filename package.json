@@ -1,6 +1,6 @@
 {
   "name": "@cssxjs/css-to-react-native",
-  "version": "3.2.0-0",
+  "version": "3.2.0-1",
   "publishConfig": {
     "access": "public"
   },
