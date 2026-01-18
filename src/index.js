@@ -78,13 +78,141 @@ export const getPropertyName = propName => {
   return camelizeStyleName(propName)
 }
 
-export default (rules, shorthandBlacklist = []) =>
-  rules.reduce((accum, rule) => {
+/**
+ * Strip CSS comments from a string
+ * Handles both single-line and multi-line comments
+ */
+const stripCssComments = css => css.replace(/\/\*[\s\S]*?\*\//g, '')
+
+/**
+ * Parse CSS declarations into React Native styles (for keyframes)
+ */
+const parseKeyframeDeclarations = declarationsStr => {
+  const declarations = []
+  const parts = declarationsStr.split(';')
+
+  for (const part of parts) {
+    const trimmed = part.trim()
+    if (!trimmed) continue
+
+    const colonIndex = trimmed.indexOf(':')
+    if (colonIndex === -1) continue
+
+    const property = trimmed.substring(0, colonIndex).trim()
+    const value = trimmed.substring(colonIndex + 1).trim()
+
+    if (property && value) {
+      declarations.push([property, value])
+    }
+  }
+
+  if (declarations.length === 0) {
+    return {}
+  }
+
+  // Transform each declaration
+  return declarations.reduce((accum, rule) => {
     const propertyName = getPropertyName(rule[0])
     const value = rule[1]
-    const allowShorthand = shorthandBlacklist.indexOf(propertyName) === -1
-    return Object.assign(
-      accum,
-      getStylesForProperty(propertyName, value, allowShorthand)
-    )
+    return Object.assign(accum, getStylesForProperty(propertyName, value, true))
   }, {})
+}
+
+/**
+ * Parse keyframe body CSS into a keyframe object
+ * @param {string} body - CSS keyframe body
+ * @returns {Object} Keyframe object with selectors as keys
+ */
+const parseKeyframeBody = body => {
+  // Strip CSS comments before parsing
+  const cleanBody = stripCssComments(body)
+
+  const keyframeObject = {}
+  const selectorRegex = /([a-zA-Z0-9%,\s]+)\s*\{\s*([^}]*)\s*\}/g
+  let selectorMatch
+
+  // eslint-disable-next-line no-cond-assign
+  while ((selectorMatch = selectorRegex.exec(cleanBody)) !== null) {
+    const selectors = selectorMatch[1]
+      .split(',')
+      .map(s => s.trim())
+      .filter(s => s)
+    const declarations = selectorMatch[2]
+
+    // Parse CSS declarations into style object
+    const styles = parseKeyframeDeclarations(declarations)
+
+    for (const selector of selectors) {
+      keyframeObject[selector] = styles
+    }
+  }
+
+  return keyframeObject
+}
+
+/**
+ * Check if a property name is a @keyframes rule
+ */
+const isKeyframesRule = propName =>
+  propName.startsWith('@keyframes ') || propName.startsWith('@keyframes\t')
+
+/**
+ * Extract keyframe name from @keyframes rule
+ */
+const getKeyframeName = propName =>
+  propName.replace(/^@keyframes\s+/, '').trim()
+
+export default (rules, shorthandBlacklist = []) => {
+  // First pass: collect @keyframes definitions
+  const keyframesMap = {}
+
+  for (const rule of rules) {
+    const propName = rule[0]
+    if (isKeyframesRule(propName)) {
+      const keyframeName = getKeyframeName(propName)
+      const keyframeBody = rule[1]
+      keyframesMap[keyframeName] = parseKeyframeBody(keyframeBody)
+    }
+  }
+
+  // Second pass: transform all non-keyframes rules
+  const result = {}
+
+  for (const rule of rules) {
+    const propName = rule[0]
+
+    // Skip @keyframes rules in the output
+    if (isKeyframesRule(propName)) {
+      continue
+    }
+
+    const propertyName = getPropertyName(propName)
+    const value = rule[1]
+    const allowShorthand = shorthandBlacklist.indexOf(propertyName) === -1
+    const propValues = getStylesForProperty(propertyName, value, allowShorthand)
+
+    Object.assign(result, propValues)
+  }
+
+  // Third pass: replace animationName strings with actual keyframe objects
+  if (result.animationName) {
+    if (Array.isArray(result.animationName)) {
+      result.animationName = result.animationName.map(name => {
+        if (typeof name === 'string' && name !== 'none' && keyframesMap[name]) {
+          return keyframesMap[name]
+        }
+        return name
+      })
+    } else if (typeof result.animationName === 'string') {
+      // Handle single value case
+      if (
+        result.animationName !== 'none' &&
+        keyframesMap[result.animationName]
+      ) {
+        result.animationName = keyframesMap[result.animationName]
+      }
+    }
+  }
+
+  return result
+}
