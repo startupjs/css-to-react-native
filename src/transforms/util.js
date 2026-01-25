@@ -9,7 +9,7 @@ import {
 } from '../tokenTypes'
 
 export const directionFactory = ({
-  types = [LENGTH, UNSUPPORTED_LENGTH_UNIT, PERCENT],
+  types = [LENGTH, UNSUPPORTED_LENGTH_UNIT, PERCENT, VARIABLE],
   directions = ['Top', 'Right', 'Bottom', 'Left'],
   prefix = '',
   suffix = '',
@@ -68,10 +68,13 @@ export const parseShadow = tokenStream => {
       offsetX === undefined &&
       tokenStream.matches(LENGTH, UNSUPPORTED_LENGTH_UNIT)
     ) {
+      // First offset must be a concrete LENGTH to distinguish from color
       offsetX = tokenStream.lastValue
       tokenStream.expect(SPACE)
-      offsetY = tokenStream.expect(LENGTH, UNSUPPORTED_LENGTH_UNIT)
+      // Second offset and radius can be VARIABLE
+      offsetY = tokenStream.expect(LENGTH, UNSUPPORTED_LENGTH_UNIT, VARIABLE)
 
+      // Try to match optional blur-radius (concrete LENGTH only here)
       tokenStream.saveRewindPoint()
       if (
         tokenStream.matches(SPACE) &&
@@ -80,6 +83,25 @@ export const parseShadow = tokenStream => {
         radius = tokenStream.lastValue
       } else {
         tokenStream.rewind()
+      }
+    } else if (
+      offsetX !== undefined &&
+      radius === undefined &&
+      color === undefined &&
+      tokenStream.matches(VARIABLE)
+    ) {
+      // VARIABLE after offsets - could be radius or color
+      // Peek ahead to determine which
+      const potentialValue = tokenStream.lastValue
+      tokenStream.saveRewindPoint()
+      if (tokenStream.matches(SPACE) && tokenStream.hasTokens()) {
+        // There's more content - this VARIABLE is the radius
+        tokenStream.rewind()
+        radius = potentialValue
+      } else {
+        // No more content - this VARIABLE is the color
+        tokenStream.rewind()
+        color = potentialValue
       }
     } else if (
       color === undefined &&

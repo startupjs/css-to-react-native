@@ -53,7 +53,7 @@ const borderRadius = directionFactory({
 })
 const borderWidth = directionFactory({ prefix: 'border', suffix: 'Width' })
 const margin = directionFactory({
-  types: [LENGTH, UNSUPPORTED_LENGTH_UNIT, PERCENT, AUTO],
+  types: [LENGTH, UNSUPPORTED_LENGTH_UNIT, PERCENT, AUTO, VARIABLE],
   prefix: 'margin',
 })
 const padding = directionFactory({ prefix: 'padding' })

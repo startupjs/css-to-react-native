@@ -1,4 +1,12 @@
-import { SPACE, COMMA, LENGTH, NUMBER, ANGLE, PERCENT } from '../tokenTypes'
+import {
+  SPACE,
+  COMMA,
+  LENGTH,
+  NUMBER,
+  ANGLE,
+  PERCENT,
+  VARIABLE,
+} from '../tokenTypes'
 
 const oneOfTypes = tokenTypes => functionStream => {
   const value = functionStream.expect(...tokenTypes)
@@ -6,9 +14,9 @@ const oneOfTypes = tokenTypes => functionStream => {
   return value
 }
 
-const singleNumber = oneOfTypes([NUMBER])
-const singleLengthOrPercent = oneOfTypes([LENGTH, PERCENT])
-const singleAngle = oneOfTypes([ANGLE])
+const singleNumber = oneOfTypes([NUMBER, VARIABLE])
+const singleLengthOrPercent = oneOfTypes([LENGTH, PERCENT, VARIABLE])
+const singleAngle = oneOfTypes([ANGLE, VARIABLE])
 const xyTransformFactory = tokenTypes => (
   key,
   valueIfOmitted
@@ -31,9 +39,9 @@ const xyTransformFactory = tokenTypes => (
 
   return [{ [`${key}Y`]: y }, { [`${key}X`]: x }]
 }
-const xyNumber = xyTransformFactory([NUMBER])
-const xyLengthOrPercent = xyTransformFactory([LENGTH, PERCENT])
-const xyAngle = xyTransformFactory([ANGLE])
+const xyNumber = xyTransformFactory([NUMBER, VARIABLE])
+const xyLengthOrPercent = xyTransformFactory([LENGTH, PERCENT, VARIABLE])
+const xyAngle = xyTransformFactory([ANGLE, VARIABLE])
 
 const partTransforms = {
   perspective: singleNumber,

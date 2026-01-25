@@ -1,5 +1,5 @@
 import camelizeStyleName from 'camelize'
-import { SPACE, COMMA, IDENT, TIME, NONE } from '../tokenTypes'
+import { SPACE, COMMA, IDENT, TIME, NONE, VARIABLE } from '../tokenTypes'
 
 // Timing function keywords
 const timingFunctionKeywords = [
@@ -65,7 +65,7 @@ export const transitionProperty = tokenStream => {
 // Transform for transition-duration
 export const transitionDuration = tokenStream => {
   const durations = parseCommaSeparatedValues(tokenStream, ts =>
-    ts.expect(TIME)
+    ts.expect(TIME, VARIABLE)
   )
   return { transitionDuration: durations }
 }
@@ -97,7 +97,9 @@ export const transitionTimingFunction = tokenStream => {
 
 // Transform for transition-delay
 export const transitionDelay = tokenStream => {
-  const delays = parseCommaSeparatedValues(tokenStream, ts => ts.expect(TIME))
+  const delays = parseCommaSeparatedValues(tokenStream, ts =>
+    ts.expect(TIME, VARIABLE)
+  )
   return { transitionDelay: delays }
 }
 
@@ -158,10 +160,20 @@ export default tokenStream => {
         continue
       }
 
+      // Match time or variable (for duration/delay) - check before functions
+      if (tokenStream.matches(TIME) || tokenStream.matches(VARIABLE)) {
+        const value = tokenStream.lastValue
+        if (duration === null) {
+          duration = value
+        } else {
+          delay = value
+        }
+        continue
+      }
+
       // Check for timing function (cubic-bezier or steps)
       const funcStream = tokenStream.matchesFunction()
       if (funcStream) {
-        // It's a function like cubic-bezier() or steps()
         const funcName = funcStream.functionName
         const args = []
         while (funcStream.hasTokens()) {
@@ -185,16 +197,6 @@ export default tokenStream => {
           timingFunction = value
         } else {
           property = value
-        }
-        continue
-      }
-
-      if (tokenStream.matches(TIME)) {
-        const value = tokenStream.lastValue
-        if (duration === null) {
-          duration = value
-        } else {
-          delay = value
         }
         continue
       }

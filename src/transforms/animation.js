@@ -1,4 +1,4 @@
-import { SPACE, COMMA, IDENT, TIME, NUMBER, NONE } from '../tokenTypes'
+import { SPACE, COMMA, IDENT, TIME, NUMBER, NONE, VARIABLE } from '../tokenTypes'
 
 // Timing function keywords
 const timingFunctionKeywords = [
@@ -67,7 +67,7 @@ const parseCommaSeparatedValues = (tokenStream, parseValue) => {
 // Transform for animation-name property
 export const animationName = tokenStream => {
   const names = parseCommaSeparatedValues(tokenStream, ts =>
-    ts.expect(IDENT, NONE)
+    ts.expect(IDENT, NONE, VARIABLE)
   )
   return { animationName: names }
 }
@@ -75,7 +75,7 @@ export const animationName = tokenStream => {
 // Transform for animation-duration property
 export const animationDuration = tokenStream => {
   const durations = parseCommaSeparatedValues(tokenStream, ts =>
-    ts.expect(TIME)
+    ts.expect(TIME, VARIABLE)
   )
   return { animationDuration: durations }
 }
@@ -107,7 +107,9 @@ export const animationTimingFunction = tokenStream => {
 
 // Transform for animation-delay property
 export const animationDelay = tokenStream => {
-  const delays = parseCommaSeparatedValues(tokenStream, ts => ts.expect(TIME))
+  const delays = parseCommaSeparatedValues(tokenStream, ts =>
+    ts.expect(TIME, VARIABLE)
+  )
   return { animationDelay: delays }
 }
 
@@ -222,6 +224,17 @@ export default tokenStream => {
         continue
       }
 
+      // Match time or variable (for duration/delay) - check before functions
+      if (tokenStream.matches(TIME) || tokenStream.matches(VARIABLE)) {
+        const value = tokenStream.lastValue
+        if (duration === null) {
+          duration = value
+        } else {
+          delay = value
+        }
+        continue
+      }
+
       // Check for timing function (cubic-bezier or steps)
       const funcStream = tokenStream.matchesFunction()
       if (funcStream) {
@@ -244,17 +257,6 @@ export default tokenStream => {
       // Match number (iteration count)
       if (tokenStream.matches(NUMBER)) {
         iterationCount = tokenStream.lastValue
-        continue
-      }
-
-      // Match time
-      if (tokenStream.matches(TIME)) {
-        const value = tokenStream.lastValue
-        if (duration === null) {
-          duration = value
-        } else {
-          delay = value
-        }
         continue
       }
 

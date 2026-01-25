@@ -105,3 +105,26 @@ it('textShadow with var() color before offset', () => {
     textShadowColor: 'var(--primary-color)',
   })
 })
+
+// Note: var() for offset-x is not supported because it's ambiguous with color-first syntax
+// e.g., 'var(--x) 20px red' could be interpreted as color=var(--x), offsets=20px red (invalid)
+// To use var() for offsets, offset-x must be a concrete value like '10px var(--y) red'
+
+it('textShadow with var() for offset-y', () => {
+  expect(transformCss([['text-shadow', '10px var(--y) red']])).toEqual({
+    textShadowOffset: { width: 10, height: 'var(--y)' },
+    textShadowRadius: 0,
+    textShadowColor: 'red',
+  })
+})
+
+it('textShadow with var() for blur-radius', () => {
+  expect(transformCss([['text-shadow', '10px 20px var(--blur) red']])).toEqual({
+    textShadowOffset: { width: 10, height: 20 },
+    textShadowRadius: 'var(--blur)',
+    textShadowColor: 'red',
+  })
+})
+
+// Note: 'var(--x) var(--y) var(--blur) var(--color)' is not supported
+// because offset-x must be a concrete value to distinguish from color-first syntax

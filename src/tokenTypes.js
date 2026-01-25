@@ -29,7 +29,8 @@ const matchColor = node => {
 
 const matchVariable = node => {
   if (
-    (node.type !== 'function' && node.value !== 'var') ||
+    node.type !== 'function' ||
+    node.value !== 'var' ||
     node.nodes.length === 0
   )
     return null
